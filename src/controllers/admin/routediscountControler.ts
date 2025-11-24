@@ -12,7 +12,7 @@ export const addRouteDiscount = async (req: Request, res: Response) => {
             route: Joi.number().required(),
             from_date: Joi.string().required(),
             to_date: Joi.string().required(),
-            discount_type: Joi.string().valid('percent', 'amount', 'increase').required(),
+            discount_type: Joi.string().valid('decrease', 'amount', 'increase').required(),
             discount_value: Joi.number().required(),
         });
         const { error, value } = createRouteDiscountSchema.validate(req.body);
@@ -62,7 +62,7 @@ export const updateRouteDiscount = async (req: Request, res: Response) => {
             route: Joi.number().required(),
             from_date: Joi.string().required(),
             to_date: Joi.string().required(),
-            discount_type: Joi.string().valid('percent', 'amount', 'increase').required(),
+            discount_type: Joi.string().valid('decrease', 'amount', 'increase').required(),
             discount_value: Joi.number().required(),
         });
 
