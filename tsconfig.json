@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2021", "DOM"],
+    "target": "ES6",
+    "module": "commonjs",
+    "outDir": "./build",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictPropertyInitialization": false,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "app.ts",
+    "src/**/*.ts",
+    "package.json",
+    "package-lock.json",
+    "uploads/**/*",
+    "src/data-source.ts",
+    "src/**/*"
+  ]
+}

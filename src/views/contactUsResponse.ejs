@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Contact Us - Support</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        table th {
+            background-color: #f2f4f6;
+            font-weight: bold;
+        }
+
+        body {
+            font-family: "Roboto", serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div
+        style="background-color: #fff;box-shadow: 0px 0px 25px rgba(0,0,0,0.09); max-width: 600px;width: 100%; margin-left: auto;margin-right: auto; ">
+        <table align="center"
+            style="background-color: #ffffff;  width:100%; max-width: 600px; maargin-left:auto; margin-right: auto; padding: 20px;">
+            <tr>
+                <td align="center" style="padding: 15px; border: 0px;">
+                    <img src="<%= image_logo %>" alt="Logo" style="height: 80px; width: 250px; object-fit: contain;" />
+                </td>
+            </tr>
+        </table>
+        <table align="center" style="background-color: #ffffff; max-width: 600px;width: 100%; ">
+            <tr>
+                <td style="padding: 30px; padding-top: 0px; border: 0px;">
+                    <h1>Austria Express - Support</h1>
+                    <p>Thank you for reaching out to us, <%= name %>! We have reviewed your query, and our team has
+                            provided a response below.</p>
+
+                    <h3>Message:</h3>
+                    <p>
+                        <%= query %>
+                    </p>
+
+                    <h3>Response:</h3>
+                    <p>
+                        <%= response %>
+                    </p>
+
+                    <p class="footer">Thank you,</p>
+                    <p class="footer">
+                        <strong>Austria Express Team</strong>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

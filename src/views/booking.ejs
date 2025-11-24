@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Ticket - Austria Express</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9f0ec;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: #004225;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0;
+            letter-spacing: 1px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .ticket-details {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            font-size: 15px;
+        }
+
+        .ticket-details th,
+        .ticket-details td {
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .ticket-details th {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .section-title {
+            margin-top: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 2px solid #004225;
+            display: inline-block;
+            padding-bottom: 5px;
+            color: #004225;
+        }
+
+        .note {
+            background-color: #fff6e5;
+            border-left: 5px solid #ffbb33;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin-top: 30px;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">Bus Booking Confirmation - Austria Express</div>
+        <p>Hello <strong><%= first_name %> <%= last_name %></strong>,</p>
+        <p>Thank you for booking with Austria Express! Here are your travel and payment details:</p>
+
+        <div class="section-title">Passenger Information</div>
+        <table class="ticket-details">
+            <tr>
+                <th>First Name</th>
+                <td><%= first_name %></td>
+                <th>Last Name</th>
+                <td><%= last_name %></td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td><%= email %></td>
+                <th>Phone</th>
+                <td><%= phone %></td>
+            </tr>
+        </table>
+
+        <div class="section-title">Booking Details</div>
+        <table class="ticket-details">
+            <tr>
+                <th>Departure</th>
+                <td><%= departure_time %> - <%= arrival_time %></td>
+                <th>Route</th>
+                <td><%= route_name %></td>
+            </tr>
+            <tr>
+                <th>Line</th>
+                <td colspan="3">From <%= from_city %> to <%= to_city %></td>
+            </tr>
+            <tr>
+                <th>Payment Method</th>
+                <td><%= payment_method %></td>
+                <th>Total Amount</th>
+                <td><%= total %></td>
+            </tr>
+            <tr>
+                <th>Booking Number</th>
+                <td colspan="3"><%= bookingNumber %></td>
+            </tr>
+        </table>
+
+        <div class="note">
+            <strong>Note:</strong> You will receive a separate email soon with your final seat allotment and confirmation.
+        </div>
+
+        <div class="footer">&copy; Austria Express. All rights reserved.</div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bus Out of Service - Austria Express</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      padding: 20px 30px;
+    }
+
+    .header {
+      background-color: #004d26;
+      color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .content {
+      padding: 20px 0;
+    }
+
+    .content p {
+      font-size: 15px;
+      color: #333333;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    table th,
+    table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #f4f4f4;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #004d26;
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #999999;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      Bus Out of Service Notification - Austria Express
+    </div>
+
+    <div class="content">
+      <p>Hello <strong><%= first_name %> <%= last_name %></strong>,</p>
+
+      <p>We regret to inform you that your scheduled bus service on <strong><%= travel_date %></strong> has been   <strong>canceled</strong> due to an unforeseen technical issue affecting the line 
+        (<strong>Line Name: <%= route_name %></strong>).</p>
+
+      <p>We sincerely apologize for the inconvenience caused. Your safety and comfort remain our top priority. We understand this may disrupt your travel plans and we’re here to help.</p>
+
+      <p>You may choose to <strong>reschedule your trip</strong> or request a <strong>full refund</strong> through your account dashboard or by contacting our support team.</p>
+
+      <p>If you need any assistance, please don’t hesitate to reach out.</p>
+
+      <!-- Passenger Information -->
+      <div class="section-title">Passenger Information</div>
+      <table>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+        </tr>
+        <tr>
+          <td><%= first_name %></td>
+          <td><%= last_name %></td>
+          <td><a href="mailto:<%= email %>"><%= email %></a></td>
+          <td><%= phone %></td>
+        </tr>
+      </table>
+
+      <!-- Booking Details -->
+      <div class="section-title">Booking Details</div>
+      <table>
+        <tr>
+          <th>Departure</th>
+          <th>Route</th>
+          <th>Line</th>
+        </tr>
+        <tr>
+          <td>
+            <%= departure_time %> - <%= arrival_time %>
+          </td>
+          <td><%= from_city %> to <%= to_city %></td>
+          <td><%= route_name %></td>
+        </tr>
+
+        <tr>
+          <th>Payment Method</th>
+          <th>Total Amount</th>
+          <th>Booking Number</th>
+        </tr>
+        <tr>
+          <td><%= payment_method %></td>
+          <td><%= total %></td>
+          <td><%= bookingNumber %></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="footer">
+      &copy; Austria Express. All rights reserved.<br />
+      This is an automated message — please do not reply directly to this email.
+    </div>
+  </div>
+</body>
+
+</html>

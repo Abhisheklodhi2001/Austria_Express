@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="http://13.61.168.187/assets/img/aLogo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Cancelled</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #FFFFFF;
+            padding: 20px;
+        }
+
+        .message-box {
+            text-align: center;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            max-width: 420px;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .message-box img {
+            width: 130px;
+            margin-bottom: 15px;
+        }
+
+        .message-box h1 {
+            color: #D32F2F; /* Red color for Payment Cancelled */
+            font-size: 26px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .message-box p {
+            font-size: 16px;
+            color: #333;
+            margin: 8px 0;
+        }
+
+        .amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0057B8;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #0057B8;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: 0.3s ease-in-out;
+        }
+
+        .btn:hover {
+            background: #003E91;
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="message-box">
+        <img src="http://13.61.168.187/assets/img/Logo_blue.svg" alt="Company Logo">
+        <h1>Payment Cancelled</h1>
+        <p><%= message %></p>
+        <p class="amount">Amount: $<%= amount %></p>
+        <p>Payment Method: <%= paymentMethod %></p>
+        <a href="http://13.61.168.187/" class="btn">Return to Home</a>
+    </div>
+</body>
+
+</html>

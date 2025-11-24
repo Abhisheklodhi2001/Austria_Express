@@ -1,0 +1,96 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <title>Contact Us - Support</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    table th {
+      background-color: #f2f4f6;
+      font-weight: bold;
+    }
+
+    body {
+      font-family: "Roboto", serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div
+    style="background-color: #fff;box-shadow: 0px 0px 25px rgba(0,0,0,0.09); max-width: 600px;width: 100%; margin-left: auto;margin-right: auto; ">
+    <table align="center"
+      style="background-color: #ffffff;  width:100%; max-width: 600px; maargin-left:auto; margin-right: auto; padding: 20px;">
+      <tr>
+        <td align="center" style="padding: 15px; border: 0px;">
+          <img src="<%= image_logo %>" alt="Logo" style="height: 80px; width: 250px; object-fit: contain;" />
+        </td>
+      </tr>
+    </table>
+    <table align="center" style="background-color: #ffffff; max-width: 600px;width: 100%; ">
+      <tr>
+        <td style="padding: 30px; padding-top: 0px; border: 0px;">
+          <h1 style="font-size: 20px; font-weight: 600;">Contact Us - Support</h1>
+          <p>Thank you for reaching out to us, <%= name %>! We have received your message, and our team will get back to
+              you shortly.</p>
+          <h3 style="margin-top:30px">Your Submitted Details:</h3>
+          <table style="margin: 20px auto; width: 100%; border: 1px solid #ddd;">
+            <thead>
+              <tr>
+                <th style="text-align: left;">Field</th>
+                <th style="text-align: left;">Information</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span style="font-weight: 400;">Name</span></td>
+                <td>
+                  <%= name %>
+                </td>
+              </tr>
+              <tr>
+                <td><span style="font-weight: 400;">Contact Number</span></td>
+                <td>
+                  <%= contact_number %>
+                </td>
+              </tr>
+              <tr>
+                <td><span style="font-weight: 400;">Email</span></td>
+                <td>
+                  <%= email %>
+                </td>
+              </tr>
+              <tr>
+                <td><span style="font-weight: 400;">Query</span></td>
+                <td>
+                  <%= message %>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-bottom:0px; margin-top:20px">Thank you,
+          </p>
+          <p class="mt-2">
+            <strong>Austria Express Team</strong>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>
