@@ -46,7 +46,7 @@ export const getRouteDiscountByRouteId = async (req: Request, res: Response) => 
         const { route_id } = value;
 
         const routeDiscountRepository = getRepository(RouteDiscount);
-        const routeDiscounts = await routeDiscountRepository.find({ where: { route: route_id, is_deleted: false } });
+        const routeDiscounts = await routeDiscountRepository.findBy({ route: { route_id: route_id }, is_deleted: false });
 
         return handleSuccess(res, 200, "Route discounts fetched successfully.", routeDiscounts);
     } catch (error: any) {
@@ -80,7 +80,7 @@ export const updateRouteDiscount = async (req: Request, res: Response) => {
         if (routeDiscount) routeDiscount.to_date = to_date;
         if (routeDiscount) routeDiscount.discount_type = discount_type;
         if (routeDiscount) routeDiscount.discount_value = discount_value;
-        
+
         await routeDiscountRepository.save(routeDiscount);
 
         return handleSuccess(res, 201, "Route discount updated successfully.", routeDiscount);
