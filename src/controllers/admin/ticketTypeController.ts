@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import Joi from "joi";
-import { getRepository } from "typeorm";
+import { getRepository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { handleSuccess, handleError, joiErrorHandle } from "../../utils/responseHandler";
 import { Route } from "../../entities/Route";
 import { getConnection } from 'typeorm';
 import { CurrencyExchangeRate } from "../../entities/currency_exchange_rate";
 import { Route_Stops } from "../../entities/RouteStop";
+import { RouteDiscount } from "../../entities/RouteDiscount";
 
 export const add_ticket_type = async (req: Request, res: Response) => {
     try {
@@ -95,6 +96,7 @@ export const get_all_ticket_type = async (req: Request, res: Response) => {
     }
 };
 
+
 export const get_ticket_type_by_routeid = async (req: Request, res: Response) => {
     try {
         const ticketTypeSchema = Joi.object({
@@ -110,6 +112,7 @@ export const get_ticket_type_by_routeid = async (req: Request, res: Response) =>
         const routeRepository = getRepository(Route);
         const routeStopsRepository = getRepository(Route_Stops);
         const currencyExchangeRepository = getRepository(CurrencyExchangeRate);
+        const routeDiscountRepository = getRepository(RouteDiscount);
 
         const findRoutes = await routeRepository.find({ where: { route_id: value.route_id } });
         if (!findRoutes.length) return handleSuccess(res, 404, "No routes found for the given route ID", []);
@@ -138,9 +141,22 @@ export const get_ticket_type_by_routeid = async (req: Request, res: Response) =>
             }
         }
 
+        const today = new Date();
+
         const newTicketTypes = await Promise.all(
             findRoutes.map(async (val) => {
-                var ticket_type
+
+                const activeDiscount = await routeDiscountRepository.findOne({
+                    where: {
+                        route: { route_id: val.route_id },
+                        from_date: LessThanOrEqual(today),
+                        to_date: MoreThanOrEqual(today),
+                        is_deleted: false
+                    },
+                    order: { discound_id: 'DESC' }
+                });
+
+                var ticket_type;
                 if (!value.pickup_point || !value.dropoff_point) {
                     ticket_type = await connection.query(`SELECT ticket_type.*, start_city.city_name AS start_city_name, end_city.city_name AS end_city_name FROM ticket_type LEFT JOIN city AS start_city ON start_city.city_id = ticket_type.startPointCityId LEFT JOIN city AS end_city ON end_city.city_id = ticket_type.endPointCityId WHERE routeRouteId = ${val.route_id} ORDER BY startPointCityId, endPointCityId ASC;`);
                 } else {
@@ -155,7 +171,21 @@ export const get_ticket_type_by_routeid = async (req: Request, res: Response) =>
                     const newRow = { ...row };
                     priceColumnNames.forEach((col: string) => {
                         if (newRow[col] !== null && !isNaN(newRow[col])) {
-                            newRow[col] = (Number(newRow[col]) * exchangeRate).toFixed(2);
+
+                            let updatedPrice = Number(newRow[col]) * exchangeRate;
+
+                            if (activeDiscount && activeDiscount.discount_value) {
+                                const discountValue = Number(activeDiscount.discount_value);
+                                if (activeDiscount.discount_type === 'decrease') {
+                                    updatedPrice = updatedPrice - (updatedPrice * discountValue) / 100;
+                                } else if (activeDiscount.discount_type === 'increase') {
+                                    updatedPrice = updatedPrice + (updatedPrice * discountValue) / 100;
+                                } else if (activeDiscount.discount_type === 'amount') {
+                                    updatedPrice = updatedPrice - discountValue; 
+                                }
+                            }
+
+                            newRow[col] = updatedPrice.toFixed(2);
                         }
                     });
                     return newRow;

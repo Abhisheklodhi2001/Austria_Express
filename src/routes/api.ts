@@ -11,6 +11,7 @@ import * as cityControllersAdmin from "../controllers/admin/cityController";
 import * as bookingController from "../controllers/api/bookingController";
 import * as ticketTypeControllers from "../controllers/api/ticketTypeController";
 import * as paymentControllers from "../controllers/api/paymentController";
+import * as settingsControllers from "../controllers/api/settingController";
 
 const router = express.Router();
 
@@ -62,6 +63,20 @@ router.get("/stripe-payment-cancelled", paymentControllers.stripePaymentCancelle
 router.post("/create-liqpay-checkout-session", authenticateUser, paymentControllers.createLiqpayCheckoutSession)
 router.post("/liqpay-payment-success", paymentControllers.liqpayPaymentSuccess);
 router.get("/liqpay-payment-cancelled", paymentControllers.liqpayPaymentCancelled);
-router.post("/liqpay-webhook", paymentControllers.liqpayPaymentWebhook)
+router.post("/liqpay-webhook", paymentControllers.liqpayPaymentWebhook);
+
+
+//======================================== service ================================
+router.get("/important-update", settingsControllers.getAllImportantUpdates);
+
+router.get("/schedule-change", settingsControllers.getAllScheduleChanges);
+
+router.get("/service-alert", settingsControllers.getAllServiceAlerts);
+
+
+//==========================================Ticket Description =============================
+
+router.get("/get-ticket-description", ticketTypeControllers.getTicketDescription);
+
 
 export default router;

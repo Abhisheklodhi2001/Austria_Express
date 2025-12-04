@@ -272,7 +272,7 @@ export const earningReports = async (req: Request, res: Response) => {
 
             const rawMonthSummary: any = {};
             const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
+
             yearlyBookings.forEach(booking => {
                 const monthName = moment(booking.created_at).format("MMM");
                 const isFromUkraine = booking.from?.from_ukraine;
@@ -302,72 +302,162 @@ export const earningReports = async (req: Request, res: Response) => {
 };
 
 export const earningReportsTypeOfTicket = async (req: Request, res: Response) => {
-    try {
-        const bookingOverviewSchema = Joi.object({
-            report_date: Joi.string().required().valid('day', 'week', 'year')
-        });
+  try {
+    const schema = Joi.object({
+      report_date: Joi.string().required().valid('day', 'week', 'year')
+    });
 
-        const { error, value } = bookingOverviewSchema.validate(req.body);
-
-        if (error) {
-            return handleError(res, 400, error.details[0].message);
-        }
-
-        const { report_date } = value;
-
-        const bookingRepository = getRepository(Booking);
-        const bookingPassengerRepository = getRepository(BookingPassenger);
-
-        let startDate: Date, endDate: Date;
-
-        if (report_date === "day") {
-            startDate = moment.utc().startOf("day").toDate();
-            endDate = moment.utc().endOf("day").toDate();
-        } else if (report_date === "week") {
-            startDate = moment().startOf('isoWeek').toDate();
-            endDate = moment().endOf('isoWeek').toDate();
-        } else {
-            startDate = moment().startOf('year').toDate();
-            endDate = moment().endOf('year').toDate();
-        }
-
-        const bookings = await bookingRepository.find({
-            where: {
-                is_deleted: false,
-                payment_status: true,
-                created_at: Between(startDate, endDate)
-            }
-        });
-
-        const bookingIds = bookings.map(b => b.id);
-        if (bookingIds.length === 0) return handleSuccess(res, 200, "No bookings found in this period", []);
-
-        const passengers = await bookingPassengerRepository.find({
-            where: {
-                booking: In(bookingIds)
-            },
-            select: ['ticket_type', 'price']
-        });
-
-        const earningsMap: Record<string, number> = {};
-        passengers.forEach(p => {
-            const type = p.ticket_type;
-            const price = Number(p.price) || 0;
-
-            if (!earningsMap[type]) earningsMap[type] = 0;
-            earningsMap[type] += price;
-        });
-
-        const earningsSummary = Object.entries(earningsMap).map(([ticket_type, total_earning]) => ({
-            ticket_type,
-            total_earning
-        }));
-
-        return handleSuccess(res, 200, "Earnings report by ticket type fetched successfully", earningsSummary);
-    } catch (error: any) {
-        return handleSuccess(res, 500, error.message);
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      return handleError(res, 400, error.details[0].message);
     }
+
+    const { report_date } = value;
+    const bookingRepository = getRepository(Booking);
+    const passengerRepository = getRepository(BookingPassenger);
+
+    let startDate: Date, endDate: Date;
+    if (report_date === 'day') {
+      startDate = moment.utc().startOf('day').toDate();
+      endDate = moment.utc().endOf('day').toDate();
+    } else if (report_date === 'week') {
+      startDate = moment().startOf('isoWeek').toDate();
+      endDate = moment().endOf('isoWeek').toDate();
+    } else {
+      startDate = moment().startOf('year').toDate();
+      endDate = moment().endOf('year').toDate();
+    }
+
+    const bookings = await bookingRepository.find({
+      where: {
+        is_deleted: false,
+        payment_status: true,
+        created_at: Between(startDate, endDate)
+      },
+      relations: ['from']  
+    });
+
+    console.log('bookings', bookings);
+
+    const bookingIds = bookings.map(b => b.id);
+    if (bookingIds.length === 0) {
+      return handleSuccess(res, 200, 'No bookings found', []);
+    }
+
+    console.log('bookingIds', bookingIds);
+
+    const passengers = await passengerRepository.find({
+      where: { booking: In(bookingIds) },
+      select: ['ticket_type', 'price'],
+      relations: ['booking'] 
+    });
+
+
+    const convertUAHtoEUR = (amount: number) => amount * 0.025;
+
+    console.log('passengers', passengers);
+
+
+    const earningsMap: Record<string, number> = {};
+
+    bookings.forEach(booking => {
+      const isUkraine = booking.from?.from_ukraine; 
+      const relatedPassengers = passengers.filter(p => p.booking.id === booking.id);
+
+      relatedPassengers.forEach(p => {
+        const type = p.ticket_type;
+        const price = Number(p.price) || 0;
+
+    
+        const finalPrice = isUkraine ? convertUAHtoEUR(price) : price;
+        console.log('finalPrice', finalPrice);
+
+        if (!earningsMap[type]) earningsMap[type] = 0;
+        earningsMap[type] += finalPrice;
+      });
+    });
+
+    const summary = Object.entries(earningsMap).map(([ticket_type, total_earning]) => ({
+      ticket_type,
+      total_earning: Number(total_earning.toFixed(2))
+    }));
+    console.log('summary', summary);
+
+    return handleSuccess(res, 200, 'Earnings report fetched successfully', summary);
+  } catch (err: any) {
+    return handleSuccess(res, 500, err.message);
+  }
 };
+
+
+
+// export const earningReportsTypeOfTicket = async (req: Request, res: Response) => {
+//     try {
+//         const bookingOverviewSchema = Joi.object({
+//             report_date: Joi.string().required().valid('day', 'week', 'year')
+//         });
+
+//         const { error, value } = bookingOverviewSchema.validate(req.body);
+
+//         if (error) {
+//             return handleError(res, 400, error.details[0].message);
+//         }
+
+//         const { report_date } = value;
+
+//         const bookingRepository = getRepository(Booking);
+//         const bookingPassengerRepository = getRepository(BookingPassenger);
+
+//         let startDate: Date, endDate: Date;
+
+//         if (report_date === "day") {
+//             startDate = moment.utc().startOf("day").toDate();
+//             endDate = moment.utc().endOf("day").toDate();
+//         } else if (report_date === "week") {
+//             startDate = moment().startOf('isoWeek').toDate();
+//             endDate = moment().endOf('isoWeek').toDate();
+//         } else {
+//             startDate = moment().startOf('year').toDate();
+//             endDate = moment().endOf('year').toDate();
+//         }
+
+//         const bookings = await bookingRepository.find({
+//             where: {
+//                 is_deleted: false,
+//                 payment_status: true,
+//                 created_at: Between(startDate, endDate)
+//             }
+//         });
+
+//         const bookingIds = bookings.map(b => b.id);
+//         if (bookingIds.length === 0) return handleSuccess(res, 200, "No bookings found in this period", []);
+
+//         const passengers = await bookingPassengerRepository.find({
+//             where: {
+//                 booking: In(bookingIds)
+//             },
+//             select: ['ticket_type', 'price']
+//         });
+
+//         const earningsMap: Record<string, number> = {};
+//         passengers.forEach(p => {
+//             const type = p.ticket_type;
+//             const price = Number(p.price) || 0;
+
+//             if (!earningsMap[type]) earningsMap[type] = 0;
+//             earningsMap[type] += price;
+//         });
+
+//         const earningsSummary = Object.entries(earningsMap).map(([ticket_type, total_earning]) => ({
+//             ticket_type,
+//             total_earning
+//         }));
+
+//         return handleSuccess(res, 200, "Earnings report by ticket type fetched successfully", earningsSummary);
+//     } catch (error: any) {
+//         return handleSuccess(res, 500, error.message);
+//     }
+// };
 
 export const userReports = async (req: Request, res: Response) => {
     try {

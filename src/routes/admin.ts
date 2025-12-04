@@ -17,6 +17,8 @@ import * as cityControllers from "../controllers/admin/cityController";
 import * as currencyExchangeControllers from "../controllers/admin/currencyExchangeController";
 import * as contactUsControllers from "../controllers/admin/contactUsController";
 import * as reportControllers from "../controllers/admin/reportController";
+import * as settingsControllers from "../controllers/admin/settingController";
+import * as ticketDescriptionControllers from "../controllers/admin/ticketDescriptionController";
 import { get_lat_long } from "../utils/latlong";
 import { get_location, get_address_by_latlong } from "../utils/searchLocation";
 
@@ -141,5 +143,24 @@ router.get("/upcoming-buses-report", authenticateAdmin, reportControllers.upcomi
 router.post("/add-routediscount", authenticateAdmin, routeDiscountControllers.addRouteDiscount);
 router.get("/get-routediscount-by-id", authenticateAdmin, routeDiscountControllers.getRouteDiscountByRouteId);
 router.post("/update-routediscount", authenticateAdmin, routeDiscountControllers.updateRouteDiscount);
+
+//================================= service =====================================
+router.post("/important-update", settingsControllers.createImportantUpdate);
+router.post("/important-update/:id", settingsControllers.updateImportantUpdate);
+router.delete("/important-update/:id", settingsControllers.deleteImportantUpdate);
+
+router.post("/schedule-change", settingsControllers.createScheduleChange);
+router.post("/schedule-change/:id", settingsControllers.updateScheduleChange);
+router.delete("/schedule-change/:id", settingsControllers.deleteScheduleChange);
+
+router.post("/service-alert", settingsControllers.createServiceAlert);
+router.post("/service-alert/:id", settingsControllers.updateServiceAlert);
+router.delete("/service-alert/:id", settingsControllers.deleteServiceAlert);
+
+//===================================Ticket Description =======================//
+
+router.post("/create-Ticket-Description", ticketDescriptionControllers.createTicketDescription);
+router.post("/update-Ticket-Description/:id", ticketDescriptionControllers.updateTicketDescription);
+router.get("/get-Ticket-Description", ticketDescriptionControllers.getTicketDescription);
 
 export default router;

@@ -16,6 +16,7 @@ import {
 import moment from "moment";
 import { CurrencyExchangeRate } from "../../entities/currency_exchange_rate";
 
+
 export const create_booking = async (req: Request, res: Response) => {
   try {
     const bookingSchema = Joi.object({
@@ -163,81 +164,187 @@ export const create_booking = async (req: Request, res: Response) => {
   }
 };
 
+
 export const get_all_booking = async (req: Request, res: Response) => {
   try {
+
+    const { page = 1, limit = 10, search = '' } = req.query;
+
+    const pageNumber = parseInt(page as string, 10);
+    const pageLimit = parseInt(limit as string, 10);
+    const offset = (pageNumber - 1) * pageLimit;
+
     const bookingSchema = Joi.object({
       booking_status: Joi.string().valid("Pending", "Confirmed", "Cancelled", "").optional(),
       search: Joi.string().optional().allow(""),
-      start_date: Joi.string().optional(),
-      end_date: Joi.string().optional(),
-      route_id: Joi.string().optional(),
+      start_date: Joi.string().optional().allow(""),
+      end_date: Joi.string().optional().allow(""),
+      route_id: Joi.string().optional().allow(""),
     });
 
     const { error, value } = bookingSchema.validate(req.body);
     if (error) return handleError(res, 400, error.details[0].message);
 
-    const { booking_status, search, start_date, end_date, route_id } = value;
+    const { booking_status, start_date, end_date, route_id } = value;
+
 
     const bookingRepository = getRepository(Booking);
     const bookingPassengerRepository = getRepository(BookingPassenger);
     const currencyExchangeRepository = getRepository(CurrencyExchangeRate);
 
-    const baseCondition: any = {
+
+    const dbWhere: any = {
       is_deleted: false,
       payment_status: true,
     };
-    if (booking_status) baseCondition.booking_status = booking_status;
-    if (start_date && end_date) baseCondition.travel_date = Between(start_date, end_date);
-    if (route_id) baseCondition.route = { route_id };  
 
-    let getAllBooking = await bookingRepository.find({
-      where: baseCondition,
+    if (booking_status) dbWhere.booking_status = booking_status;
+    if (start_date && end_date) dbWhere.travel_date = Between(start_date, end_date);
+    if (route_id) dbWhere.route = { route_id };
+
+
+    const [bookings, total] = await bookingRepository.findAndCount({
+      where: dbWhere,
       relations: ["from", "to"],
       order: { created_at: "DESC" },
+      take: pageLimit,
+      skip: offset,
     });
 
+
+    let filteredBookings = bookings;
     if (search) {
-      const lowerSearch = search.toLowerCase();
-      getAllBooking = getAllBooking.filter(
-        val =>
-          val?.from?.city_name?.toLowerCase().includes(lowerSearch) ||
-          val?.to?.city_name?.toLowerCase().includes(lowerSearch) ||
-          val?.first_name?.toLocaleLowerCase().includes(lowerSearch) ||
-          val?.last_name?.toLocaleLowerCase().includes(lowerSearch) ||
-          val?.email?.toLocaleLowerCase().includes(lowerSearch) ||
-          val?.phone?.toLocaleLowerCase().includes(lowerSearch) ||
-          val?.booking_number?.toLocaleLowerCase().includes(lowerSearch)
+      const lowerSearch = (search as string).toLowerCase();
+      filteredBookings = filteredBookings.filter(val =>
+        val?.from?.city_name?.toLowerCase().includes(lowerSearch) ||
+        val?.to?.city_name?.toLowerCase().includes(lowerSearch) ||
+        val?.first_name?.toLowerCase().includes(lowerSearch) ||
+        val?.last_name?.toLowerCase().includes(lowerSearch) ||
+        val?.email?.toLowerCase().includes(lowerSearch) ||
+        val?.phone?.toLowerCase().includes(lowerSearch) ||
+        val?.booking_number?.toLowerCase().includes(lowerSearch)
       );
     }
 
-    const bookingPassengers = await Promise.all(
-      getAllBooking.map(async (product) => {
+
+    const bookingWithPassengers = await Promise.all(
+      filteredBookings.map(async (booking) => {
         const passengers = await bookingPassengerRepository.find({
-          where: { booking: { id: product.id } },
+          where: { booking: { id: booking.id } },
         });
 
         let exchangeRate = 1;
-        if (product?.from?.from_ukraine) {
+        if (booking?.from?.from_ukraine) {
           const currencyData = await currencyExchangeRepository.findOne({
             where: { from_currency: 'EUR', to_currency: 'UAH' }
           });
-
           exchangeRate = currencyData ? Number(currencyData.rate) || 1 : 1;
         }
 
-        product.subtotal = Number((product.subtotal / exchangeRate).toFixed(2));
-        product.total = Number((product.total / exchangeRate).toFixed(2));
+        booking.subtotal = Number((booking.subtotal / exchangeRate).toFixed(2));
+        booking.total = Number((booking.total / exchangeRate).toFixed(2));
 
-        return { ...product, passengers };
+        return { ...booking, passengers };
       })
     );
 
-    return handleSuccess(res, 200, "Get All Booking", bookingPassengers);
+
+    const totalPages = Math.ceil(total / pageLimit);
+
+
+    return handleSuccess(res, 200, "Bookings fetched successfully.", {
+      bookings: bookingWithPassengers,
+      pagination: {
+        total,
+        totalPages,
+        currentPage: pageNumber,
+        pageSize: pageLimit,
+      }
+    });
+
   } catch (error: any) {
     console.error("Error in get_all_booking:", error);
     return handleError(res, 500, error.message);
   }
 };
+
+
+
+// export const get_all_booking = async (req: Request, res: Response) => {
+//   try {
+//     const bookingSchema = Joi.object({
+//       booking_status: Joi.string().valid("Pending", "Confirmed", "Cancelled", "").optional(),
+//       search: Joi.string().optional().allow(""),
+//       start_date: Joi.string().optional(),
+//       end_date: Joi.string().optional(),
+//       route_id: Joi.string().optional(),
+//     });
+
+//     const { error, value } = bookingSchema.validate(req.body);
+//     if (error) return handleError(res, 400, error.details[0].message);
+
+//     const { booking_status, search, start_date, end_date, route_id } = value;
+
+//     const bookingRepository = getRepository(Booking);
+//     const bookingPassengerRepository = getRepository(BookingPassenger);
+//     const currencyExchangeRepository = getRepository(CurrencyExchangeRate);
+
+//     const baseCondition: any = {
+//       is_deleted: false,
+//       payment_status: true,
+//     };
+//     if (booking_status) baseCondition.booking_status = booking_status;
+//     if (start_date && end_date) baseCondition.travel_date = Between(start_date, end_date);
+//     if (route_id) baseCondition.route = { route_id };  
+
+//     let getAllBooking = await bookingRepository.find({
+//       where: baseCondition,
+//       relations: ["from", "to"],
+//       order: { created_at: "DESC" },
+//     });
+
+//     if (search) {
+//       const lowerSearch = search.toLowerCase();
+//       getAllBooking = getAllBooking.filter(
+//         val =>
+//           val?.from?.city_name?.toLowerCase().includes(lowerSearch) ||
+//           val?.to?.city_name?.toLowerCase().includes(lowerSearch) ||
+//           val?.first_name?.toLocaleLowerCase().includes(lowerSearch) ||
+//           val?.last_name?.toLocaleLowerCase().includes(lowerSearch) ||
+//           val?.email?.toLocaleLowerCase().includes(lowerSearch) ||
+//           val?.phone?.toLocaleLowerCase().includes(lowerSearch) ||
+//           val?.booking_number?.toLocaleLowerCase().includes(lowerSearch)
+//       );
+//     }
+
+//     const bookingPassengers = await Promise.all(
+//       getAllBooking.map(async (product) => {
+//         const passengers = await bookingPassengerRepository.find({
+//           where: { booking: { id: product.id } },
+//         });
+
+//         let exchangeRate = 1;
+//         if (product?.from?.from_ukraine) {
+//           const currencyData = await currencyExchangeRepository.findOne({
+//             where: { from_currency: 'EUR', to_currency: 'UAH' }
+//           });
+
+//           exchangeRate = currencyData ? Number(currencyData.rate) || 1 : 1;
+//         }
+
+//         product.subtotal = Number((product.subtotal / exchangeRate).toFixed(2));
+//         product.total = Number((product.total / exchangeRate).toFixed(2));
+
+//         return { ...product, passengers };
+//       })
+//     );
+
+//     return handleSuccess(res, 200, "Get All Booking", bookingPassengers);
+//   } catch (error: any) {
+//     console.error("Error in get_all_booking:", error);
+//     return handleError(res, 500, error.message);
+//   }
+// };
 
 
 export const get_booking_by_id = async (req: Request, res: Response) => {

@@ -21,6 +21,13 @@ export class BookingPassenger {
     @Column({ type: 'decimal', precision: 10, scale: 2 })
     price: string;
 
+    @Column({ type: "boolean", default: false })
+    is_return: boolean;
+
+
+    // @Column({ type: 'varchar', length: 10, default: 'EUR' })
+    // currency: string;
+
     @CreateDateColumn()
     created_at: Date;
 

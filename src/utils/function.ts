@@ -231,3 +231,7 @@ export const generateTransactionNumber = async (dateString: string) => {
     const sequence = (count + 1).toString().padStart(3, "0");
     return `TNX${dateString.replace(/-/g, '')}${sequence}`;
 };
+
+export const convertToMatchFormat = (time: string | String) => {
+  return moment(time.toString(), "DD-MM-YYYY HH:mm").format("YYYY-MM-DD HH:mm");
+};

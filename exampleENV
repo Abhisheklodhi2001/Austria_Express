@@ -1,30 +1,32 @@
 #============================================
+IS_LIVE=false
 PORT=4200
-APP_URL =`http://192.168.29.44:4200/`
-FRONTEND_URL =`http://13.61.168.187/`
-LOGO_URL = `http://18.229.202.71:4000/Austria%20Express.png`
-
+APP_URL =`http://192.168.1.20:4200/`
+FRONTEND_URL =`http://192.168.1.20/`
+LOGO_URL = `http://192.168.1.20:4000/Austria%20Express.png`
+ 
 #=============================================
 SALT_ROUNDS=10
 JWT_EXPIRATION=31d
 REFRESH_TOKEN_EXPIRY=31d
 JWT_SECRET=my-32-character-ultra-secure-and-ultra-long-secret
 REFRESH_JWT_SECRET=my-32-character-ultra-secure-and-ultra-long-secret
-
+ 
 #=============================================
 EMAIL_USER=office@bus-express.at
 EMAIL_PASS=@W76722LAlena@
-
+ 
 #=============================================
 TIMEZONE=
-
+ 
 #=============================================
 GOOGLE_API_KEY=AIzaSyC8X41J3doX7L5Xlb6MdlH5X50DrqdijY4
-
+ 
 #=============================================
 STRIPE_PUBLISHABLE_KEY = pk_test_51PBGw6SBGwcQvbTXhN6aE8MNFwe5sLmCvLWCWEA3mYbx1WJreUvx42wNm48tOWNRmwuRpXcerFK9rviNzpZnDUhP00F4ESuVv8
 STRIPE_SECRET_KEY = sk_test_51PBGw6SBGwcQvbTXp3T7Znm1xicQ93SufhzMkmurH3WdV1yN0QXhfUj3zEJAkUzxtuejllY6mQp3DutylzyzgJEW00sWRkIHCd
-
+ 
 #=============================================
 LIQPAY_PUBLIC_KEY = sandbox_i61682360536
 LIQPAY_SECRET_KEY = sandbox_RJqdYVToxMrbjQr0VYEdTAcNW8DOp99wCFGwpFoX
+ 

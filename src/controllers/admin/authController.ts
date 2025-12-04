@@ -543,7 +543,7 @@ export const dashboard_details = async (req: Request, res: Response) => {
 
     const [Confirmed, Pending, Cancelled] = await Promise.all([
       bookingRepository.count({ where: { booking_status: 'Confirmed', is_deleted: false, payment_status: true } }),
-      bookingRepository.count({ where: { booking_status: 'Pending', is_deleted: false, payment_status: true } }),
+      bookingRepository.count({ where: { booking_status: 'Pending', is_deleted: false } }),
       bookingRepository.count({ where: { booking_status: 'Cancelled', is_deleted: false, payment_status: true } })
     ]);
 
