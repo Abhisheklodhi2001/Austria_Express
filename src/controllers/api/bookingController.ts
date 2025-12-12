@@ -13,6 +13,154 @@ import moment from "moment";
 import { Transaction } from "../../entities/Transaction";
 
 
+// export const create_booking = async (req: Request, res: Response) => {
+//   try {
+//     const bookingSchema = Joi.object({
+//       route: Joi.string().required(),
+//       route_name: Joi.string().required(),
+//       from: Joi.string().required(),
+//       from_city: Joi.string().required(),
+//       from_ukraine: Joi.required().allow(true, false),
+//       to: Joi.string().required(),
+//       to_city: Joi.string().required(),
+//       travel_date: Joi.string().isoDate().required(),
+//       departure_time: Joi.string().required(),
+//       arrival_time: Joi.string().required(),
+//       payment_method: Joi.string().required(),
+//       subtotal: Joi.number().precision(2).required(),
+//       tax: Joi.number().precision(2).required(),
+//       total: Joi.number().precision(2).required(),
+//       deposit: Joi.number().precision(2).required(),
+//       ticket_details: Joi.string().required(),
+//       first_name: Joi.string().required(),
+//       last_name: Joi.string().required(),
+//       phone: Joi.string().required(),
+//       email: Joi.string().email().required(),
+//       notes: Joi.string().optional().allow(null, ""),
+//     });
+
+//     const { error, value } = bookingSchema.validate(req.body);
+//     if (error) return handleError(res, 400, error.details[0].message);
+
+//     const bookingRepository = getRepository(Booking);
+//     const bookingPassengerRepository = getRepository(BookingPassenger);
+//     const transactionRepository = getRepository(Transaction);
+
+//     const {
+//       route,
+//       route_name,
+//       from,
+//       from_city,
+//       from_ukraine,
+//       to,
+//       to_city,
+//       travel_date,
+//       departure_time,
+//       arrival_time,
+//       payment_method,
+//       subtotal,
+//       tax,
+//       total,
+//       deposit,
+//       ticket_details,
+//       first_name,
+//       last_name,
+//       phone,
+//       email,
+//       notes,
+//     } = value;
+//     const user_req = req.user as IUser;
+
+//     const newBooking = bookingRepository.create({
+//       booking_number: await generateBookingNumber(moment(travel_date).format("DD-MM-YYYY")),
+//       route: route,
+//       from: from,
+//       to: to,
+//       travel_date: moment(travel_date).format("DD-MM-YYYY"),
+//       departure_time: departure_time,
+//       arrival_time: arrival_time,
+//       payment_method: payment_method,
+//       subtotal: subtotal,
+//       tax: tax,
+//       total: total,
+//       deposit: deposit,
+//       first_name: first_name,
+//       last_name: last_name,
+//       phone: phone,
+//       email: email,
+//       notes: notes,
+//       booking_user_id: user_req.id,
+//       payment_status: payment_method == "Cash" ? true : false,
+//     });
+//     await bookingRepository.save(newBooking);
+
+//     JSON.parse(ticket_details).map(async (passenger: any) => {
+//       const newPassenger = bookingPassengerRepository.create({
+//         booking: newBooking,
+//         ticket_type: passenger.ticketType,
+//         selected_seat:
+//           passenger.selectedSeat == "" ? null : passenger.selectedSeat,
+//         passenger_name: passenger.passengerName,
+//         price: passenger.price,
+//       });
+//       await bookingPassengerRepository.save(newPassenger);
+//     });
+
+//     if (payment_method == "Cash") {
+//       const transaction = transactionRepository.create({
+//         transaction_number: await generateTransactionNumber(moment(travel_date).format("DD-MM-YYYY")),
+//         booking: newBooking,
+//         user: user_req.id,
+//         amount: Number(total),
+//         amount_paid: Number(deposit),
+//         currency: "eur",
+//         payment_method: "cash",
+//         payment_type: "Cash",
+//         status: "completed",
+//         external_transaction_id: "unknown",
+//         description: "Bus ticket payment",
+//         payment_details: null,
+//       });
+//       await transactionRepository.save(transaction);
+
+//       const emailTemplatePath = path.resolve(
+//         __dirname,
+//         "../../views/booking.ejs"
+//       );
+//       const emailHtml = await ejs.renderFile(emailTemplatePath, {
+//         bookingNumber: newBooking.booking_number,
+//         first_name,
+//         last_name,
+//         email,
+//         phone,
+//         total: from_ukraine == 'true' ? total + '₴' : total + '€',
+//         departure_time,
+//         arrival_time,
+//         payment_method,
+//         route_name,
+//         from_city,
+//         to_city,
+//       });
+//       const emailOptions = {
+//         to: email,
+//         subject: "Your Ticket Has Been Successfully Booked",
+//         html: emailHtml,
+//       };
+//       await sendEmail(emailOptions);
+//     }
+
+//     return handleSuccess(
+//       res,
+//       201,
+//       "Your ticket has been booked successfully",
+//       newBooking
+//     );
+//   } catch (error: any) {
+//     console.error("Error in create booking:", error);
+//     return handleError(res, 500, error.message);
+//   }
+// };
+
 export const create_booking = async (req: Request, res: Response) => {
   try {
     const bookingSchema = Joi.object({
@@ -20,23 +168,36 @@ export const create_booking = async (req: Request, res: Response) => {
       route_name: Joi.string().required(),
       from: Joi.string().required(),
       from_city: Joi.string().required(),
-      from_ukraine: Joi.required().allow(true, false),
+      from_ukraine: Joi.boolean().required(),
       to: Joi.string().required(),
       to_city: Joi.string().required(),
       travel_date: Joi.string().isoDate().required(),
       departure_time: Joi.string().required(),
       arrival_time: Joi.string().required(),
       payment_method: Joi.string().required(),
-      subtotal: Joi.number().precision(2).required(),
-      tax: Joi.number().precision(2).required(),
-      total: Joi.number().precision(2).required(),
-      deposit: Joi.number().precision(2).required(),
+      subtotal: Joi.number().required(),
+      tax: Joi.number().required(),
+      total: Joi.number().required(),
+      deposit: Joi.number().required(),
       ticket_details: Joi.string().required(),
-      first_name: Joi.string().required(),
-      last_name: Joi.string().required(),
-      phone: Joi.string().required(),
-      email: Joi.string().email().required(),
-      notes: Joi.string().optional().allow(null, ""),
+      return_trip: Joi.object({
+        route: Joi.string().required(),
+        route_name: Joi.string().required(),
+        from: Joi.string().required(),
+        from_city: Joi.string().required(),
+        from_ukraine: Joi.required().allow(true, false),
+        to: Joi.string().required(),
+        to_city: Joi.string().required(),
+        travel_date: Joi.string().isoDate().required(),
+        departure_time: Joi.string().required(),
+        arrival_time: Joi.string().required(),
+        payment_method: Joi.string().required(),
+        subtotal: Joi.number().precision(2).required(),
+        tax: Joi.number().precision(2).required(),
+        total: Joi.number().precision(2).required(),
+        deposit: Joi.number().precision(2).required(),
+        ticket_details: Joi.string().required(),
+      }).optional()
     });
 
     const { error, value } = bookingSchema.validate(req.body);
@@ -45,121 +206,111 @@ export const create_booking = async (req: Request, res: Response) => {
     const bookingRepository = getRepository(Booking);
     const bookingPassengerRepository = getRepository(BookingPassenger);
     const transactionRepository = getRepository(Transaction);
-
-    const {
-      route,
-      route_name,
-      from,
-      from_city,
-      from_ukraine,
-      to,
-      to_city,
-      travel_date,
-      departure_time,
-      arrival_time,
-      payment_method,
-      subtotal,
-      tax,
-      total,
-      deposit,
-      ticket_details,
-      first_name,
-      last_name,
-      phone,
-      email,
-      notes,
-    } = value;
     const user_req = req.user as IUser;
 
-    const newBooking = bookingRepository.create({
-      booking_number: await generateBookingNumber(moment(travel_date).format("DD-MM-YYYY")),
-      route: route,
-      from: from,
-      to: to,
-      travel_date: moment(travel_date).format("DD-MM-YYYY"),
-      departure_time: departure_time,
-      arrival_time: arrival_time,
-      payment_method: payment_method,
-      subtotal: subtotal,
-      tax: tax,
-      total: total,
-      deposit: deposit,
-      first_name: first_name,
-      last_name: last_name,
-      phone: phone,
-      email: email,
-      notes: notes,
+    // ➤ ONWARD BOOKING
+    const onwardBooking = bookingRepository.create({
+      booking_number: await generateBookingNumber(moment(value.travel_date).format("DD-MM-YYYY")),
+      route: value.route,
+      from: value.from,
+      to: value.to,
+      travel_date: moment(value.travel_date).format("DD-MM-YYYY"),
+      departure_time: value.departure_time,
+      arrival_time: value.arrival_time,
+      payment_method: value.payment_method,
+      subtotal: value.subtotal,
+      tax: value.tax,
+      total: value.total,
+      deposit: value.deposit,
+      first_name: value.first_name,
+      last_name: value.last_name,
+      phone: value.phone,
+      email: value.email,
+      notes: value.notes,
       booking_user_id: user_req.id,
-      payment_status: payment_method == "Cash" ? true : false,
-    });
-    await bookingRepository.save(newBooking);
+      payment_status: value.payment_method == "Cash",
 
-    JSON.parse(ticket_details).map(async (passenger: any) => {
-      const newPassenger = bookingPassengerRepository.create({
-        booking: newBooking,
-        ticket_type: passenger.ticketType,
-        selected_seat:
-          passenger.selectedSeat == "" ? null : passenger.selectedSeat,
-        passenger_name: passenger.passengerName,
-        price: passenger.price,
-      });
-      await bookingPassengerRepository.save(newPassenger);
+      // ⭐ NEW FIELDS
+      is_return_trip: false,
+      parent_booking_id: null,
     });
 
-    if (payment_method == "Cash") {
-      const transaction = transactionRepository.create({
-        transaction_number: await generateTransactionNumber(moment(travel_date).format("DD-MM-YYYY")),
-        booking: newBooking,
-        user: user_req.id,
-        amount: Number(total),
-        amount_paid: Number(deposit),
-        currency: "eur",
-        payment_method: "cash",
-        payment_type: "Cash",
-        status: "completed",
-        external_transaction_id: "unknown",
-        description: "Bus ticket payment",
-        payment_details: null,
-      });
-      await transactionRepository.save(transaction);
 
-      const emailTemplatePath = path.resolve(
-        __dirname,
-        "../../views/booking.ejs"
+    await bookingRepository.save(onwardBooking);
+
+    const onwardPassengers = JSON.parse(value.ticket_details || "[]");
+    for (const p of onwardPassengers) {
+      await bookingPassengerRepository.save(
+        bookingPassengerRepository.create({
+          booking: onwardBooking,
+          ticket_type: p.ticketType,
+          selected_seat: p.selectedSeat || null,
+          passenger_name: p.passengerName,
+          price: p.price,
+        })
       );
-      const emailHtml = await ejs.renderFile(emailTemplatePath, {
-        bookingNumber: newBooking.booking_number,
-        first_name,
-        last_name,
-        email,
-        phone,
-        total: from_ukraine == 'true' ? total + '₴' : total + '€',
-        departure_time,
-        arrival_time,
-        payment_method,
-        route_name,
-        from_city,
-        to_city,
-      });
-      const emailOptions = {
-        to: email,
-        subject: "Your Ticket Has Been Successfully Booked",
-        html: emailHtml,
-      };
-      await sendEmail(emailOptions);
     }
 
-    return handleSuccess(
-      res,
-      201,
-      "Your ticket has been booked successfully",
-      newBooking
-    );
+    // ➤ RETURN BOOKING
+    let returnBooking = null;
+
+    if (value.is_return_trip === true) {
+      returnBooking = bookingRepository.create({
+        booking_number: await generateBookingNumber(moment(value.return_trip.travel_date).format("DD-MM-YYYY")),
+        route: value.return_trip.route,
+        from: value.return_trip.from,
+        to: value.return_trip.to,
+        travel_date: moment(value.return_trip.travel_date).format("DD-MM-YYYY"),
+        departure_time: value.return_trip.departure_time,
+        arrival_time: value.return_trip.arrival_time,
+        payment_method: value.return_trip.payment_method,
+        subtotal: value.return_trip.subtotal,
+        tax: value.return_trip.tax,
+        total: value.return_trip.total,
+        deposit: value.return_trip.deposit,
+        first_name: value.first_name,
+        last_name: value.last_name,
+        phone: value.phone,
+        email: value.email,
+        notes: value.notes,
+        booking_user_id: user_req.id,
+        payment_status: value.return_trip.payment_method == "Cash",
+
+        // ⭐ NEW FIELDS
+        is_return_trip: true,
+        parent_booking_id: onwardBooking.id,
+      });
+
+
+      await bookingRepository.save(returnBooking);
+
+      const returnPassengers = JSON.parse(value.return_ticket_details || "[]");
+      for (const p of returnPassengers) {
+        await bookingPassengerRepository.save(
+          bookingPassengerRepository.create({
+            booking: returnBooking,
+            ticket_type: p.ticketType,
+            selected_seat: p.selectedSeat || null,
+            passenger_name: p.passengerName,
+            price: p.price,
+          })
+        );
+      }
+    }
+
+    return handleSuccess(res, 201, "Your ticket has been booked successfully", {
+      onwardBooking,
+      returnBooking,
+    });
+
   } catch (error: any) {
-    console.error("Error in create booking:", error);
+    console.log(error);
     return handleError(res, 500, error.message);
   }
 };
+
+
+
 
 export const getUpcommingTicketBookingTransactionsByUserId = async (req: Request, res: Response) => {
   try {

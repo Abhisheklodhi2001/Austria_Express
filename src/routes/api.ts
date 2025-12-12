@@ -56,6 +56,8 @@ router.get("/get-ticket-booking-by-booking-id", bookingController.getTicketBooki
 //==================================== Ticket Type ==============================
 router.post("/get-ticket-type-by-routeid", ticketTypeControllers.get_ticket_type_by_routeid);
 
+router.post("/get-ticket-type-by-routeid-return", ticketTypeControllers.get_ticket_type_return_by_routeid);
+
 //==================================== Payment ==============================
 router.post("/create-stripe-checkout-session", authenticateUser, paymentControllers.createStripeCheckoutSession);
 router.get("/stripe-payment-success", paymentControllers.stripePaymentSuccess);
