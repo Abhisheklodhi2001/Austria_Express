@@ -21,7 +21,7 @@ export const create_booking = async (req: Request, res: Response) => {
       route_name: Joi.string().required(),
       from: Joi.string().required(),
       from_city: Joi.string().required(),
-      from_ukraine: Joi.required().allow(true, false),
+      // from_ukraine: Joi.required().allow(true, false),
       to: Joi.string().required(),
       to_city: Joi.string().required(),
       travel_date: Joi.string().isoDate().required(),
@@ -192,7 +192,7 @@ export const create_booking = async (req: Request, res: Response) => {
       await bookingRepository.save(returnBooking);
 
       // PASSENGERS
-      for (let p of JSON.parse(rd.ticket_details)) {
+      for (let p of rd.ticket_details) {
         await bookingPassengerRepository.save({
           booking: returnBooking,
           ticket_type: p.ticketType,
