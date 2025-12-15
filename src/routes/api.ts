@@ -44,6 +44,7 @@ router.post("/cities-countries-search", cityControllers.searchCitiesByCountry);
 router.get("/get-all-city", cityControllers.getAllCity);
 router.post("/get-to-city-by-from-city-id", cityControllers.getToCityByFromCityId);
 
+
 //======================== Cities ======================================
 router.get("/get-all-city", cityControllersAdmin.getAllActiveCity);
 
