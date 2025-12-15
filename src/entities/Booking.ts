@@ -10,6 +10,12 @@ export class Booking {
     @Column({ unique: true })
     booking_number: string;
 
+    @Column({ type: 'int', nullable: true })
+    parent_booking_id: number | null;
+
+    @Column({ type: 'enum', enum: ['onward', 'return'], default: 'onward' })
+    trip_type: string;
+
     @ManyToOne(() => Route, { nullable: false, onDelete: "CASCADE" })
     route: Route;
 
@@ -75,13 +81,6 @@ export class Booking {
 
     @Column({ type: 'boolean', default: false })
     is_deleted: boolean;
-
-    @Column({ type: 'boolean', default: false })
-    is_return_trip: boolean;
-
-    // 🔥 NEW FIELD — onward booking id (only if this is return)
-    @Column({ type: 'int', nullable: true })
-    parent_booking_id: number | null;
 
     @CreateDateColumn()
     created_at: Date;
