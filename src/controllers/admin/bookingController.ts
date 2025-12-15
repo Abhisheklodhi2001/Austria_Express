@@ -23,7 +23,7 @@ export const create_booking = async (req: Request, res: Response) => {
       route: Joi.string().required(),
       from: Joi.string().required(),
       to: Joi.string().required(),
-      from_ukraine: Joi.required().allow(true, false),
+      from_ukraine: Joi.optional().allow(true, false),
       travel_date: Joi.string().isoDate().required(),
       departure_time: Joi.string().required(),
       arrival_time: Joi.string().required(),
@@ -609,10 +609,7 @@ export const get_booking_by_route_date_and_from_to = async (
   }
 };
 
-export const getTicketBookingByBookingId = async (
-  req: Request,
-  res: Response
-) => {
+export const getTicketBookingByBookingId = async (req: Request, res: Response) => {
   try {
     const bookingSchema = Joi.object({
       id: Joi.number().required(),
@@ -621,34 +618,114 @@ export const getTicketBookingByBookingId = async (
     const { error, value } = bookingSchema.validate(req.query);
     if (error) return handleError(res, 400, error.details[0].message);
 
-    const bookingRepository = getRepository(Booking);
-    const bookingPassengerRepository = getRepository(BookingPassenger);
-
     const { id } = value;
 
-    const getAllBooking = await bookingRepository.find({
-      where: { id, is_deleted: false, payment_status: true },
+    const bookingRepository = getRepository(Booking);
+    const bookingPassengerRepository = getRepository(BookingPassenger);
+    const transactionRepository = getRepository(Transaction);
+
+    // ---------- FETCH ONWARD BOOKING ----------
+    const onwardBooking = await bookingRepository.findOne({
+      where: {
+        id,
+        is_deleted: false,
+      },
       relations: ["from", "to", "route"],
     });
 
-    if (!getAllBooking.length)
+    if (!onwardBooking) {
       return handleError(res, 404, "Booking not found");
+    }
 
-    const bookingPassengers = await Promise.all(
-      getAllBooking.map(async (product) => {
-        const passengers = await bookingPassengerRepository.find({
-          where: { booking: { id: product.id } },
-        });
-        return { ...product, passengers };
-      })
-    );
+    // ---------- FETCH RETURN BOOKING (IF EXISTS) ----------
+    const returnBooking = await bookingRepository.findOne({
+      where: {
+        parent_booking_id: onwardBooking.id,
+        trip_type: "return",
+        is_deleted: false,
+      },
+      relations: ["from", "to", "route"],
+    });
 
-    return handleSuccess(res, 200, "Get Ticket Booking", bookingPassengers);
+    // ---------- ATTACH TRANSACTIONS ----------
+    const attachTransaction = async (booking: Booking) => {
+      const transaction = await transactionRepository.find({
+        where: { booking: { id: booking.id } },
+      });
+      return { ...booking, transaction };
+    };
+
+    const onwardWithTransaction = await attachTransaction(onwardBooking);
+    const returnWithTransaction = returnBooking
+      ? await attachTransaction(returnBooking)
+      : null;
+
+    // ---------- ATTACH PASSENGERS ----------
+    const attachPassengers = async (bookingData: any) => {
+      const passengers = await bookingPassengerRepository.find({
+        where: { booking: { id: bookingData.id } },
+      });
+      return { ...bookingData, passengers };
+    };
+
+    const onwardFinal = await attachPassengers(onwardWithTransaction);
+    const returnFinal = returnWithTransaction
+      ? await attachPassengers(returnWithTransaction)
+      : null;
+
+    // ---------- RESPONSE ----------
+    return handleSuccess(res, 200, "Get Ticket Booking", {
+      onward: onwardFinal,
+      return: returnFinal,
+    });
+
   } catch (error: any) {
-    console.error("Error in create booking:", error);
+    console.error("Error in getTicketBookingByBookingId:", error);
     return handleError(res, 500, error.message);
   }
 };
+
+
+// export const getTicketBookingByBookingId = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   try {
+//     const bookingSchema = Joi.object({
+//       id: Joi.number().required(),
+//     });
+
+//     const { error, value } = bookingSchema.validate(req.query);
+//     if (error) return handleError(res, 400, error.details[0].message);
+
+//     const bookingRepository = getRepository(Booking);
+//     const bookingPassengerRepository = getRepository(BookingPassenger);
+
+//     const { id } = value;
+
+//     const getAllBooking = await bookingRepository.find({
+//       where: { id, is_deleted: false, payment_status: true },
+//       relations: ["from", "to", "route"],
+//     });
+
+//     if (!getAllBooking.length)
+//       return handleError(res, 404, "Booking not found");
+
+//     const bookingPassengers = await Promise.all(
+//       getAllBooking.map(async (product) => {
+//         const passengers = await bookingPassengerRepository.find({
+//           where: { booking: { id: product.id } },
+//         });
+//         return { ...product, passengers };
+//       })
+//     );
+
+//     return handleSuccess(res, 200, "Get Ticket Booking", bookingPassengers);
+//   } catch (error: any) {
+//     console.error("Error in create booking:", error);
+//     return handleError(res, 500, error.message);
+//   }
+// };
 
 export const getTicketBookingTransactions = async (
   req: Request,
