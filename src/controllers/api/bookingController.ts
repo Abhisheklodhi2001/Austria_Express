@@ -420,44 +420,70 @@ export const getTicketBookingByBookingId = async (req: Request, res: Response) =
     const { error, value } = bookingSchema.validate(req.query);
     if (error) return handleError(res, 400, error.details[0].message);
 
+    const { id } = value;
+
     const bookingRepository = getRepository(Booking);
     const bookingPassengerRepository = getRepository(BookingPassenger);
     const transactionRepository = getRepository(Transaction);
 
-    const { id } = value;
-
-    const getAllBooking = await bookingRepository.find({
-      where: { id, is_deleted: false, payment_status: true },
+  
+    const onwardBooking = await bookingRepository.findOne({
+      where: {
+        id,
+        is_deleted: false,
+      },
       relations: ["from", "to", "route"],
     });
 
-    if (!getAllBooking.length)
+    if (!onwardBooking) {
       return handleError(res, 404, "Booking not found");
+    }
 
-    const transactionRes = await Promise.all(
-      getAllBooking.map(async (booking) => {
-        const transaction = await transactionRepository.find({
-          where: { booking: { id: booking.id } },
-        });
-        return { ...booking, transaction };
-      })
-    )
+    const returnBooking = await bookingRepository.findOne({
+      where: {
+        parent_booking_id: onwardBooking.id,
+        trip_type: "return",
+        is_deleted: false,
+      },
+      relations: ["from", "to", "route"],
+    });
 
-    const bookingPassengers = await Promise.all(
-      transactionRes.map(async (product) => {
-        const passengers = await bookingPassengerRepository.find({
-          where: { booking: { id: product.id } },
-        });
-        return { ...product, passengers };
-      })
-    );
+    const attachTransaction = async (booking: Booking) => {
+      const transaction = await transactionRepository.find({
+        where: { booking: { id: booking.id } },
+      });
+      return { ...booking, transaction };
+    };
 
-    return handleSuccess(res, 200, "Get Ticket Booking", bookingPassengers);
+    const onwardWithTransaction = await attachTransaction(onwardBooking);
+    const returnWithTransaction = returnBooking
+      ? await attachTransaction(returnBooking)
+      : null;
+
+    const attachPassengers = async (bookingData: any) => {
+      const passengers = await bookingPassengerRepository.find({
+        where: { booking: { id: bookingData.id } },
+      });
+      return { ...bookingData, passengers };
+    };
+
+    const onwardFinal = await attachPassengers(onwardWithTransaction);
+    const returnFinal = returnWithTransaction
+      ? await attachPassengers(returnWithTransaction)
+      : null;
+
+
+    return handleSuccess(res, 200, "Get Ticket Booking", {
+      onward: onwardFinal,
+      return: returnFinal,
+    });
+
   } catch (error: any) {
-    console.error("Error in create booking:", error);
+    console.error("Error in getTicketBookingByBookingId:", error);
     return handleError(res, 500, error.message);
   }
 };
+
 
 
 // export const bus_search = async (req: Request, res: Response) => {

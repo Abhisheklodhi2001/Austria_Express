@@ -242,7 +242,8 @@ export const get_ticket_type_return_by_routeid = async (req: Request, res: Respo
         let exchangeRate = 1;
         if (applyExchange) {
             const currencyData = await currencyRepository.findOne({
-                where: { from_currency: "EUR", to_currency: "UAH" }
+                // where: { from_currency: "EUR", to_currency: "UAH" }
+                where: { from_currency: "UAH", to_currency: "EUR" }
             });
             if (currencyData) exchangeRate = Number(currencyData.rate) || 1;
         }
